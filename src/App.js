@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
-import Signup from "./components/SignUp";
+import Signup from "./components/Signup";
 import Login from "./components/Login";
 
 const App = () => {
