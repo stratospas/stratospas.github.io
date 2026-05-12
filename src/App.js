@@ -11,6 +11,7 @@ import MyWheel from "./components/Wheel";
 import VoteOption from "./components/VoteOption";
 import VotingPage from "./pages/VotingPage";
 import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import CountriesManage from "./pages/CountriesManage";
 
 const App = () => {
 	const [user, setUser] = useState(null);
@@ -44,7 +45,8 @@ const App = () => {
 				await setDoc(docRef, {
 					username: currentUser.email,
 					bonus: Math.floor(Math.random() * 6),
-					countries: countriesList
+					countries: countriesList,
+					score: 0
 				});
 			}
 			else {
@@ -88,7 +90,8 @@ const App = () => {
 				<button onClick={() => signOut(auth)}>Logout</button>
 				<Image src="main_logo.png" alt="log" style={{width: '100vw'}}/>
 
-				<VotingPage userData={userData} language={language[langKey]} />
+				<CountriesManage />
+				{/* <VotingPage userData={userData} language={language[langKey]} /> */}
 
 				</div>
 			) : (
