@@ -1,131 +1,135 @@
-// src/App.js
 import React, { useEffect, useState } from "react";
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import './App.css';
+import { Button, Col, Form, Image, Nav, Row, Stack, Tab, Tabs } from 'react-bootstrap';
+import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "./firebase";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
-import { Button, Col, Form, Image, Row, Stack, Tab, Tabs } from "react-bootstrap";
 import GoogleSign from "./components/GoogleSign";
 import language from "./lang";
-import MyWheel from "./components/Wheel";
-import VoteOption from "./components/VoteOption";
+import Index from "./pages/Index";
 import VotingPage from "./pages/VotingPage";
-import { collection, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import Menu from "./components/Menu";
+import Results from "./pages/Results";
 import CountriesManage from "./pages/CountriesManage";
+import { getCountries } from "./service";
 
-const App = () => {
+
+const Layout = ({user}) => {
+	
+	const [langKey, setLangKey] = useState("gr");
+
+	const logOut = async () => {
+		await signOut(auth)
+	}
+	
+	useEffect(() => {
+		
+	}, [user]);
+
+
+
+	return (
+		<div>
+			{user
+			?	<div style={{overflowY:'hidden'}}>
+					<Image src="main_logo.png" rounded fluid />
+					<Row className="justify-content-end p-0 mb-3">
+						<Col xs='auto'>
+						 	<Button size="sm" variant="outline-secondary" onClick={logOut}>Αποσύνδεση</Button>
+						</Col>
+					</Row>
+					<Menu/>
+					<Outlet />
+					<div className='padd' />
+				</div>
+
+			: <Stack  gap={5} className="align-items-center">
+                    <Row  className="mt-5">
+                        <Col xs='auto' className="p-4 border rounded shadow">
+                            <Tabs defaultActiveKey="login"
+                                className="mb-3"
+                                justify >
+                                <Tab eventKey="login" title={language[langKey].login}>
+                                    <Login language={language[langKey]} />
+                                </Tab>
+                                <Tab eventKey="signup" title={language[langKey].signup}>
+                                    <Signup language={language[langKey]} />
+                                </Tab>
+                            </Tabs>
+                        </Col>
+                    </Row>
+                    
+                    <Row><Col>or</Col></Row>
+
+                    <Row><Col>
+                        <GoogleSign language={language[langKey]} />
+                    </Col></Row>
+                </Stack>
+
+			}
+		</div>
+	);
+  };
+  
+
+function App() {
 	const [user, setUser] = useState(null);
 	const [userData, setUserData] = useState(null);
+	
 	const [langKey, setLangKey] = useState("gr");
-	const [mustSpin, setMustSpin] = useState(false);
-	const ll = 'gr';
-
-	const [countries, setCountries] = useState([]);
-	// 	[
-	// 	{name: 'Greece',	pickedBy: null},
-	// 	{name: 'Italy',		pickedBy: null },
-	// 	{name: 'Germany',	pickedBy: null },
-	// 	{name: 'Spain',		pickedBy: null }
-	// ]);
-
+	
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
 			setUser(currentUser);
-			// console.log("Auth state changed, current user:", currentUser);
 
+			if ( currentUser ){
+				const col = collection(db, "users");
+				const q = query(col, where("email", "==", currentUser.email));
+				
+				const docSnap = await getDocs(q);
+				if(docSnap.empty) {
+					const countriesList = await getCountries(false);
+					const data = {
+						email: currentUser.email,
+						username: currentUser.displayName,
+						bonus: Math.floor(Math.random() * 6),
+						countries: countriesList,
+						score: 0
+					};
+					const docRef = doc(col);
+					const x = await setDoc(docRef, data);
+					alert(x)
+					setUserData({ ...userData, id: x });
+				}
+				else {
+					const userData = docSnap.docs[0].data();
+					setUserData({ ...userData, id: docSnap.docs[0].id });
+				}
+			}
 
-			const col = collection(db, "users");
-			const q = query(col, where("username", "==", currentUser.email));
 			
-			const docSnap = await getDocs(q);
-			if(docSnap.empty) {
-				const countriesList = await getCounties();
-				setCountries(countriesList);
-				const docRef = doc(col);
-				await setDoc(docRef, {
-					username: currentUser.email,
-					bonus: Math.floor(Math.random() * 6),
-					countries: countriesList,
-					score: 0
-				});
-			}
-			else {
-				const userData = docSnap.docs[0].data();
-				// console.log("User data:", { ...userData, id: docSnap.docs[0].id });
-				setUserData({ ...userData, id: docSnap.docs[0].id });
-				setCountries(userData.countries);
-			}
 		});
 
 		
 		return () => unsubscribe();
 	}, []);
 
-	const getCounties = async ( full = false) => {
-		const countriesCol = collection(db, "countries");
-		const countriesSnapshot = await getDocs(countriesCol);
-		if(full) {
-			return countriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-		}
-		return countriesSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, pickedBy: null }));
-	}
-	
-	function sg() {		
-		const provider = new GoogleAuthProvider();
-		signInWithPopup(auth, provider)
-			.then((result) => {
-				console.log("Google sign-in successful:", result.user);
-				
-			})
-			.catch((error) => {
-				console.error("Google sign-in error:", error);
-			});
-	}
-
-	return (
-		<div>
-			{user ? (
-				<div>
-				<h2>Welcome, {user.email}</h2>
-				<button onClick={() => signOut(auth)}>Logout</button>
-				<Image src="main_logo.png" alt="log" style={{width: '100vw'}}/>
-
-				<CountriesManage />
-				{/* <VotingPage userData={userData} language={language[langKey]} /> */}
-
-				</div>
-			) : (
-				<Stack  gap={5} className="align-items-center">
-					<Row><Col>
-						<Form.Select aria-label="Default select example" onChange={(e) => setLangKey(e.target.value)}>
-							<option value="gr">GR</option>
-							<option value="en">US</option>
-						</Form.Select>
-					</Col></Row>
-					<Row  className="mt-5">
-						<Col xs='auto' className="p-4 border rounded shadow">
-							<Tabs defaultActiveKey="login"
-								className="mb-3"
-								justify >
-								<Tab eventKey="login" title={language[langKey].login}>
-									<Login language={language[langKey]} />
-								</Tab>
-								<Tab eventKey="signup" title={language[langKey].signup}>
-									<Signup language={language[langKey]} />
-								</Tab>
-							</Tabs>
-						</Col>
-					</Row>
+    return (
+		<BrowserRouter>
+			<Routes>
+				<Route element={<Layout user={user}/>} >
+					<Route path='/' Component={Index} />
+					<Route path='/vote' element={<VotingPage userData={userData} language={language[langKey]}/>} />
+					<Route path='/results' element={<Results user={userData} language={language[langKey]}/>} />
 					
-					<Row><Col>or</Col></Row>
-
-					<Row><Col>
-						<GoogleSign language={language[langKey]} />
-					</Col></Row>
-				</Stack>
-			)}
-		</div>
-	);
-};
+				</Route>
+				<Route path='/admin' element={<CountriesManage />} />
+			</Routes>
+		</BrowserRouter>
+    );
+}
 
 export default App;

@@ -1,0 +1,50 @@
+.menu-row{
+    padding: 1vh 1vw 1vh 1vw;
+    background-color: rgb(210, 198, 212);
+}
+.menu-item{
+    margin-left: 10px;
+    margin-right: 10px;
+
+}
+.menu-button{
+    border: 1px solid grey;
+    font-size: 0.65em;
+    width: 40px;
+} 
+
+.menu-item-1{
+    font-size: 0.7em;
+    width: 94px;
+}
+
+
+.menu{
+    position: fixed;
+    bottom: 0;
+    padding: 0;
+}
+@media screen and (min-width:600px) {
+    .menu{
+        position: relative;
+        padding: 0;
+    }
+}
+
+.picked{
+    background-color: #482a81 !important;
+    color: white !important;
+    border: 0 !important;
+    width: 29vw !important;
+    border: 2px solid #482a81 !important;
+}
+
+.unpicked{
+    background-color: #ffffff !important;
+    color: #482a81 !important;
+    border: 2px solid #482a81 !important;
+    width: 29vw !important;
+}
+
+
+ 

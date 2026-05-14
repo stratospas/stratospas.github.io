@@ -25,7 +25,7 @@ const VoteOption = ({level, options, updatePick}) => {
 
 	return(
 		<Container >
-			<Row className="align-items-center justify-content-center" style={{backgroundColor: '#482a81'}}>
+			<Row className="align-items-center justify-content-center">
 				<Col xs='auto' >{level}:</Col>
 				<Col xs={6} >
 					<Form.Select size="sm" aria-label="Default select example" onChange={handleChange} value={pick}>

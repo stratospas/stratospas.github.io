@@ -11,9 +11,11 @@ const GoogleSign = ({language}) => {
         signInWithPopup(auth, provider)
             .then((result) => {
                 console.log("Google sign-in successful:", result.user);
+                alert(result)
             })
             .catch((error) => {
                 console.error("Google sign-in error:", error);
+                alert(error)
             });
     }
 

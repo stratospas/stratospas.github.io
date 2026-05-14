@@ -12,8 +12,7 @@ const Login = ({language}) => {
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		try {
-			await signInWithEmailAndPassword(auth, email, password);
-			alert("Logged in successfully!");
+			await signInWithEmailAndPassword(auth, email, password);;
 		} catch (err) {
 			setError(err.message);
 		}
