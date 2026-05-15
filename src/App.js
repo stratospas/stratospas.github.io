@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { HashRouter, Outlet, Route, Routes } from 'react-router-dom';
 import './App.css';
 import { Button, Col, Form, Image, Nav, Row, Stack, Tab, Tabs } from 'react-bootstrap';
 import { collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
@@ -118,7 +118,7 @@ function App() {
 	}, []);
 
     return (
-		<BrowserRouter>
+		<HashRouter>
 			<Routes>
 				<Route element={<Layout user={user}/>} >
 					<Route path='/' Component={Index} />
@@ -128,7 +128,7 @@ function App() {
 				</Route>
 				<Route path='/admin' element={<CountriesManage />} />
 			</Routes>
-		</BrowserRouter>
+		</HashRouter>
     );
 }
 
